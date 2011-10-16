@@ -1,6 +1,7 @@
 module Data.HRTree where
 
 import Data.HRTree.Geometry
+import Data.HRTree.Hilbert
 import Data.List as L (insert, intercalate)
 
 type Key = Int
@@ -75,8 +76,8 @@ makeNodes records = if (length records <= nodeCapacity)
 -- | Get the key for this object.  For now this will just be 1.
 getKey :: (SpatiallyBounded a) => a -> Key
 getKey item = case center item of
-            Nothing -> 0
-            Just (Point x y) -> x + y
+                Just p -> hilbertValue 16 p
+                Nothing -> 0
 
 getNodeKey :: (SpatiallyBounded a) => RTree a -> Key
 getNodeKey (Node records) = foldr max 0 . map nrKey $ records
