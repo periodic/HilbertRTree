@@ -5,9 +5,10 @@ module Data.HRTree.Geometry ( Point(..)
                             ) where
 
 import Data.Monoid
+import Data.Word
 
 -- | A point just references a point in two-dimensional space, coordinates are given as ints.
-data Point = Point Int Int deriving (Eq, Ord)
+data Point = Point Word16 Word16 deriving (Eq, Ord)
 
 instance Show Point where
     show (Point x y) = "(" ++ show x ++ "," ++ show y ++ ")"

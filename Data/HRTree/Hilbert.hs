@@ -3,8 +3,8 @@ module Data.HRTree.Hilbert where
 import Data.Bits
 import Data.HRTree.Geometry
 
-hilbertValue :: Int -> Point -> Int
-hilbertValue d (Point x y) = hilbertDistance d (x,y)
+hilbertValue :: (Integral a, Bits a) => Int -> Point -> a
+hilbertValue d (Point x y) = hilbertDistance d (fromIntegral x, fromIntegral y)
 
 {-| Hilbert distance function by Bryan O'Sullivan.
  - http://www.serpentine.com/blog/2007/01/11/two-dimensional-spatial-hashing-with-space-filling-curves/

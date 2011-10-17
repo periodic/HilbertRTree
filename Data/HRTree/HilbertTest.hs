@@ -23,7 +23,6 @@ prop_AlwaysNonNegative (PosInt16 x) (PosInt16 y) = hilbertDistance 16 (x, y) >= 
 
 
 -- |Run all the tests.
-quickCheckAll :: IO ()
-quickCheckAll = do
-    quickCheck prop_HigherOrderHigherValue
+testAll :: IO ()
+testAll = do
     quickCheck prop_AlwaysNonNegative

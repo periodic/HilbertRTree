@@ -43,8 +43,8 @@ prop_BoxIsBigger points = let box = boundingBox points
                           in all (bbIntersect box) points
 
 -- |Run all the tests.
-quickCheckAll :: IO ()
-quickCheckAll = do
+testAll :: IO ()
+testAll = do
     quickCheck prop_Associative
     quickCheck prop_BBIntersectSelf
     quickCheck prop_BoxIsBigger
