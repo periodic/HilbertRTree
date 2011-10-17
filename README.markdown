@@ -1,6 +1,12 @@
 # Hilbert R Tree
 
+Author: Andrew Haven (ahaven@stanford.edu)
+
 This project is a simple implementation of a (Hilbert R Tree)[http://en.wikipedia.org/wiki/Hilbert_R-tree].  It uses the Hilbert Curve to order the keys in an RTree, which places close points relatively close in the tree.  This makes it efficient to find other near points or intersecting points because much of the time all the geometric features inside a bounding box are all on the same branch of the tree.
+
+## Building
+
+To build, simply run `cabal build` in the root of the source tree.  This will compile a binary and place it at dist/build/hrtree/hrtree.  Run the program with a text file 
 
 ## Implementation
 

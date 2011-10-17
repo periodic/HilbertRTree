@@ -4,7 +4,11 @@ Synopsis:           Simple Hilbert RTree
 Description:        Stores spatial data in an RTree indexed by hilbert distance
 Author:             Drew Haven
 Maintainer:         Drew Haven <drew.haven@gmail.com>
-Build-depends:      base >= 4, bytestring, containers, mtl, attoparsec
+Build-depends:      base >= 4,
+                    bytestring,
+                    containers,
+                    mtl,
+                    attoparsec
 Build-type:         Simple
 
 Executable:         hrtree
