@@ -6,6 +6,8 @@ import System.Environment (getArgs)
 import System.CPUTime
 import Text.Printf
 
+maxMatches = 4
+
 main :: IO ()
 main = do
     args <- getArgs
@@ -41,7 +43,7 @@ interactiveLoop tree = loop
             let matches = search r t
             (m, dt) <- time 10e6 (return (length matches `seq` matches))
             printf "found %d matches in %f microseconds.\n" (length m) dt
-            mapM_ print m
+            mapM_ print . take maxMatches $ m
 
 
 time :: Double -> IO a -> IO (a, Double)
