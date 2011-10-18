@@ -64,7 +64,7 @@ empty = Leaf []
 insert :: (SpatiallyBounded a) => a -> RTree a -> RTree a
 insert item tree =
     let record = makeLeafRecord item
-     in case insert_k record tree of
+     in case insertK record tree of
         [] -> error "Empty tree returned."
         [r] -> r
         rs  -> Node . map makeNodeRecord $ rs
@@ -98,14 +98,14 @@ makeLeafRecord i = LR (boundingBox i) (getKey i) i
 
 -- | Make a set of leaf records from a set of LeafRecords, respecting the max capacity.
 makeLeaves :: (SpatiallyBounded a) => [LeafRecord a] -> [RTree a]
-makeLeaves records = if (length records <= leafCapacity)
+makeLeaves records = if length records <= leafCapacity
                      then [Leaf records]
                      else let (these, rest) = splitAt (leafCapacity `div` 2) records
                            in Leaf these : makeLeaves rest
 
 -- | Make a set of node records from a set of NodeRecords, respecting the max capacity.
 makeNodes :: (SpatiallyBounded a) => [NodeRecord a] -> [RTree a]
-makeNodes records = if (length records <= nodeCapacity)
+makeNodes records = if length records <= nodeCapacity
                      then [Node records]
                      else let (these, rest) = splitAt (nodeCapacity `div` 2) records
                            in Node these : makeNodes rest
@@ -118,8 +118,8 @@ getKey item = case center item of
 
 -- | Get the key for a node.
 getNodeKey :: (SpatiallyBounded a) => RTree a -> Key
-getNodeKey (Node records) = foldr max 0 . map nrKey $ records
-getNodeKey (Leaf records) = foldr max 0 . map lrKey $ records
+getNodeKey (Node records) = foldr (max . nrKey) 0 records
+getNodeKey (Leaf records) = foldr (max . lrKey) 0 records
 
 {- | Inserting a leaf record in the tree.
  -
@@ -130,14 +130,14 @@ getNodeKey (Leaf records) = foldr max 0 . map lrKey $ records
  - the first node for which the key is greater than or equal to the key for the
  - object we are inserting.
  -}
-insert_k :: (SpatiallyBounded a) => LeafRecord a -> RTree a -> [RTree a]
-insert_k r (Leaf records) = makeLeaves $ L.insert r records
+insertK :: (SpatiallyBounded a) => LeafRecord a -> RTree a -> [RTree a]
+insertK r (Leaf records) = makeLeaves $ L.insert r records
 
-insert_k leaf@(LR _ key _) (Node records) =
+insertK leaf@(LR _ key _) (Node records) =
     let findNode [] = return . makeNodeRecord . Leaf . return $ leaf
-        findNode (r:[]) = map makeNodeRecord $ insert_k leaf (nrChild r)
+        findNode (r:[]) = map makeNodeRecord $ insertK leaf (nrChild r)
         findNode (r:rs) = if nrKey r >= key
-                          then (map makeNodeRecord $ insert_k leaf (nrChild r)) ++ rs
+                          then map makeNodeRecord (insertK leaf (nrChild r)) ++ rs
                           else r : findNode rs
      in makeNodes (findNode records)
 

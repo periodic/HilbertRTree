@@ -54,7 +54,7 @@ instance (SpatiallyBounded a, SpatiallyBounded b) => SpatiallyBounded (a, b) whe
     boundingBox (a, b) = boundingBox a `mappend` boundingBox  b
 
 instance SpatiallyBounded a => SpatiallyBounded [a] where
-    boundingBox boxes = foldr mappend EmptyBox . map boundingBox $ boxes
+    boundingBox = foldr (mappend . boundingBox) EmptyBox
 
 -- | Intersection of two boxes
 bbIntersect :: (SpatiallyBounded a, SpatiallyBounded b) => a -> b -> Bool

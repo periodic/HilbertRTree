@@ -11,7 +11,7 @@ import Test.QuickCheck
 import Control.Applicative ((<$>))
 
 instance (SpatiallyBounded a, Arbitrary a) => Arbitrary (RTree a) where
-    arbitrary = foldr (insert) empty <$> arbitrary
+    arbitrary = foldr insert empty <$> arbitrary
 
 instance (SpatiallyBounded a, Arbitrary a) => Arbitrary (NodeRecord a) where
     arbitrary = makeNodeRecord <$> arbitrary
