@@ -65,7 +65,7 @@ empty = Leaf []
 insert :: (SpatiallyBounded a) => a -> RTree a -> RTree a
 insert item tree =
     let record = makeLeafRecord item
-     in case insertK record [tree] of
+     in case insertK record tree of
         [] -> error "Empty tree returned."
         [r] -> r
         rs  -> Node . map makeNodeRecord $ rs
@@ -89,6 +89,11 @@ search target = let mbr = boundingBox target
  - Non-exported functions
  ------------------------------------------------------------}
 
+-- | Get the number of records in a node
+numRecords :: (SpatiallyBounded a) => RTree a -> Int
+numRecords (Node rs) = length rs
+numRecords (Leaf rs) = length rs
+
 -- | Wrap a node in a record, getting the right key and mbr.
 makeNodeRecord :: (SpatiallyBounded a) => RTree a -> NodeRecord a
 makeNodeRecord t = NR (boundingBox t) (getNodeKey t) t
@@ -99,23 +104,33 @@ makeLeafRecord i = LR (boundingBox i) (getKey i) i
 
 -- | Make a set of leaf records from a set of LeafRecords, respecting the max capacity.
 makeLeaves :: (SpatiallyBounded a) => [LeafRecord a] -> [RTree a]
-makeLeaves records = if length records <= leafCapacity
-                     then [Leaf records]
-                     else map Leaf . distribute (splitOrder + 1) $ records
+makeLeaves records = let nodeCount = ((length records - 1) `div` leafCapacity + 1)
+                      in map Leaf . distribute nodeCount $ records
 
 -- | Make a set of node records from a set of NodeRecords, respecting the max capacity.
 makeNodes :: (SpatiallyBounded a) => [NodeRecord a] -> [RTree a]
-makeNodes records = if length records <= nodeCapacity
-                     then [Node records]
-                     else map Node . distribute (splitOrder + 1) $ records
+makeNodes records = let nodeCount = ((length records - 1) `div` nodeCapacity + 1)
+                     in map Node . distribute nodeCount $ records
 
 -- | Split a list into n sublists evenly.
-distribute :: Integer -> [a] -> [[a]]
+distribute :: Int -> [a] -> [[a]]
 distribute n xs = L.unfoldr split xs
     where
         limit = ceiling (fromIntegral (length xs) / fromIntegral n)
         split [] = Nothing
         split ys = Just . splitAt limit $ ys
+
+-- | Redistribute records among a set of nodes.  Note that nodes must al be of the same type.  If not, we're in trouble.
+redistribute :: (SpatiallyBounded a) => [RTree a] -> [RTree a]
+redistribute [] = []
+redistribute [a] = [a]
+redistribute [(Node as),(Node bs)]           = makeNodes (as ++ bs)
+redistribute [(Node as),(Node bs),(Node cs)] = makeNodes (as ++ bs ++ cs)
+redistribute [(Leaf as),(Leaf bs)]           = makeLeaves (as ++ bs)
+redistribute [(Leaf as),(Leaf bs),(Leaf cs)] = makeLeaves (as ++ bs ++ cs)
+redistribute nodes = if length nodes > 3
+                     then error "Redistributing among too many nodes."
+                     else error "Incompatible node types.  Inconsistent tree."
 
 -- | Get the key for this object.
 getKey :: (SpatiallyBounded a) => a -> Key
@@ -136,15 +151,37 @@ getNodeKey (Leaf records) = foldr (max . lrKey) 0 records
  - For a node this requires we find the right sub-node to insert in, which is
  - the first node for which the key is greater than or equal to the key for the
  - object we are inserting.
+ -
+ - This function is the hairiest part of the program.  It really needs some
+ - cleanup.  I'm filing that under future enhancements.
  -}
-insertK :: (SpatiallyBounded a) => LeafRecord a -> [RTree a] -> [RTree a]
-insertK r leaves@((Leaf _):_) = makeLeaves . L.insert r . concatMap (\(Leaf records) -> records) $ leaves
+insertK :: (SpatiallyBounded a) => LeafRecord a -> RTree a -> [RTree a]
+insertK r (Leaf records) = makeLeaves . L.insert r $ records
 
-insertK leaf@(LR _ key _) nodes =
-    let findNode [] = return . makeNodeRecord . Leaf . return $ leaf
-        findNode (r:[]) = map makeNodeRecord $ insertK leaf [nrChild r]
-        findNode (r:rs) = if nrKey r >= key
-                          then map makeNodeRecord (insertK leaf [nrChild r]) ++ rs
-                          else r : findNode rs
-     in makeNodes . findNode . concatMap (\(Node records) -> records) $ nodes
+insertK leaf@(LR _ key _) (Node records) = makeNodes . findNode [] $ records
+    where
+        findNode []         []      = return . makeNodeRecord . Leaf . return $ leaf
+        findNode (p:[])     []      = map makeNodeRecord . insertK leaf . nrChild $ p
+        findNode (p:p2:prev)[]      = (reverse prev ++) . map makeNodeRecord . redistribute . (nrChild p2 :) . insertK leaf . nrChild $ p
+        findNode prev       (r:next)= 
+            if nrKey r >= key
+            then insertHere prev r next
+            else findNode (r:prev) next 
+
+        insertHere ps r ns = let newNodes   = insertK leaf (nrChild r)
+                                 newRecords = map makeNodeRecord newNodes
+                              in if length newNodes == 1
+                                 then reverse ps ++ newRecords ++ ns
+                                 else case (ps,ns) of
+                                    ([],     []    ) -> newRecords
+                                    ((p:ps), []    ) -> reverse ps ++ map makeNodeRecord (redistribute (nrChild p : newNodes))
+                                    ([],     (n:ns)) -> map makeNodeRecord (redistribute (newNodes ++ [nrChild n])) ++ ns
+                                    ((p:ps), (n:ns)) -> let pSize = numRecords . nrChild $ p
+                                                            nSize = numRecords . nrChild $ n
+                                                         in if (pSize < nSize)
+                                                            then reverse ps     ++ map makeNodeRecord (redistribute (nrChild p : newNodes))    ++ n:ns
+                                                            else reverse (p:ps) ++ map makeNodeRecord (redistribute (newNodes ++ [nrChild n])) ++ ns
+
+
+
 
