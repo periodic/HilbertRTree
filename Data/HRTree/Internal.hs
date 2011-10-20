@@ -3,11 +3,12 @@ module Data.HRTree.Internal where
 import Data.HRTree.Geometry
 import Data.HRTree.Hilbert
 import Data.Word
-import qualified Data.List as L (insert)
+import qualified Data.List as L (insert, unfoldr)
 
 -- | Capacity constants.  TODO: Make these tunable.
 nodeCapacity = 4
 leafCapacity = 4
+splitOrder = 1
 
 -- | Type alias for the type we're going to use as a key.
 type Key = Word32
@@ -64,7 +65,7 @@ empty = Leaf []
 insert :: (SpatiallyBounded a) => a -> RTree a -> RTree a
 insert item tree =
     let record = makeLeafRecord item
-     in case insertK record tree of
+     in case insertK record [tree] of
         [] -> error "Empty tree returned."
         [r] -> r
         rs  -> Node . map makeNodeRecord $ rs
@@ -100,15 +101,21 @@ makeLeafRecord i = LR (boundingBox i) (getKey i) i
 makeLeaves :: (SpatiallyBounded a) => [LeafRecord a] -> [RTree a]
 makeLeaves records = if length records <= leafCapacity
                      then [Leaf records]
-                     else let (these, rest) = splitAt (leafCapacity `div` 2) records
-                           in Leaf these : makeLeaves rest
+                     else map Leaf . distribute (splitOrder + 1) $ records
 
 -- | Make a set of node records from a set of NodeRecords, respecting the max capacity.
 makeNodes :: (SpatiallyBounded a) => [NodeRecord a] -> [RTree a]
 makeNodes records = if length records <= nodeCapacity
                      then [Node records]
-                     else let (these, rest) = splitAt (nodeCapacity `div` 2) records
-                           in Node these : makeNodes rest
+                     else map Node . distribute (splitOrder + 1) $ records
+
+-- | Split a list into n sublists evenly.
+distribute :: Integer -> [a] -> [[a]]
+distribute n xs = L.unfoldr split xs
+    where
+        limit = ceiling (fromIntegral (length xs) / fromIntegral n)
+        split [] = Nothing
+        split ys = Just . splitAt limit $ ys
 
 -- | Get the key for this object.
 getKey :: (SpatiallyBounded a) => a -> Key
@@ -130,14 +137,14 @@ getNodeKey (Leaf records) = foldr (max . lrKey) 0 records
  - the first node for which the key is greater than or equal to the key for the
  - object we are inserting.
  -}
-insertK :: (SpatiallyBounded a) => LeafRecord a -> RTree a -> [RTree a]
-insertK r (Leaf records) = makeLeaves $ L.insert r records
+insertK :: (SpatiallyBounded a) => LeafRecord a -> [RTree a] -> [RTree a]
+insertK r leaves@((Leaf _):_) = makeLeaves . L.insert r . concatMap (\(Leaf records) -> records) $ leaves
 
-insertK leaf@(LR _ key _) (Node records) =
+insertK leaf@(LR _ key _) nodes =
     let findNode [] = return . makeNodeRecord . Leaf . return $ leaf
-        findNode (r:[]) = map makeNodeRecord $ insertK leaf (nrChild r)
+        findNode (r:[]) = map makeNodeRecord $ insertK leaf [nrChild r]
         findNode (r:rs) = if nrKey r >= key
-                          then map makeNodeRecord (insertK leaf (nrChild r)) ++ rs
+                          then map makeNodeRecord (insertK leaf [nrChild r]) ++ rs
                           else r : findNode rs
-     in makeNodes (findNode records)
+     in makeNodes . findNode . concatMap (\(Node records) -> records) $ nodes
 
