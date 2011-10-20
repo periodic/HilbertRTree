@@ -45,6 +45,9 @@ prop_BoxIsBigger points = let box = boundingBox points
 -- |Run all the tests.
 testAll :: IO ()
 testAll = do
+    putStrLn "boundingBox is associative."
     quickCheck prop_Associative
+    putStrLn "Bounding boxes intersect themselves."
     quickCheck prop_BBIntersectSelf
+    putStrLn "A bounding box always contains every point used to create it."
     quickCheck prop_BoxIsBigger

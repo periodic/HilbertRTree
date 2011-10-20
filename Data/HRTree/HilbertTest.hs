@@ -25,4 +25,5 @@ prop_AlwaysNonNegative (PosInt16 x) (PosInt16 y) = hilbertDistance 16 (x, y) >= 
 -- |Run all the tests.
 testAll :: IO ()
 testAll = do
+    putStrLn "Hilbert values are always non-negative."
     quickCheck prop_AlwaysNonNegative
