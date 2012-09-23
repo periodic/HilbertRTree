@@ -9,7 +9,7 @@ hilbertValue d (Point x y) = hilbertDistance d (fromIntegral x, fromIntegral y)
 {-| Hilbert distance function by Bryan O'Sullivan.
  - http://www.serpentine.com/blog/2007/01/11/two-dimensional-spatial-hashing-with-space-filling-curves/
  -}
-hilbertDistance :: (Bits a, Ord a) => Int -> (a,a) -> a
+hilbertDistance :: (Num a, Bits a, Ord a) => Int -> (a,a) -> a
 hilbertDistance d (x,y)
     | x < 0 || x >= 1 `shiftL` d = error "x bounds"
     | y < 0 || y >= 1 `shiftL` d = error "y bounds"
