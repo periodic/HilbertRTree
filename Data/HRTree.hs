@@ -4,7 +4,7 @@ module Data.HRTree ( empty
                    , RTree
                    , BoundingBox (..)
                    , Point (..)
-                   , SpatiallyBounded
+                   , SpatiallyBounded(..)
                    ) where
 
 import Data.HRTree.Geometry
