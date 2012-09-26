@@ -45,7 +45,9 @@ class SpatiallyBounded a where
 instance SpatiallyBounded BoundingBox where
     boundingBox box = box
     center EmptyBox = Nothing
-    center (BoundingBox (Point x1 y1) (Point x2 y2)) = Just $ Point ((x1 + x2) `div` 2) ((y1 + y2) `div` 2)
+    center (BoundingBox (Point x1 y1) (Point x2 y2)) = let sx = fi x1 + fi x2 :: Word32
+                                                           sy = fi y1 + fi y2 :: Word32
+                                                       in Just $ Point (fi $ sx `div` 2) (fi $ sy `div` 2)
 
 instance SpatiallyBounded Point where
     boundingBox p = BoundingBox p p
@@ -66,3 +68,6 @@ bbIntersect a b | (boundingBox a == EmptyBox) || (boundingBox b == EmptyBox) = F
                                             then b1 <= a2
                                             else a1 <= b2
                   in intersect xa1 xa2 xb1 xb2 && intersect ya1 ya2 yb1 yb2
+
+fi :: (Integral a, Num b) => a -> b
+fi a = fromIntegral a
