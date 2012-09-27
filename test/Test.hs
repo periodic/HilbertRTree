@@ -1,4 +1,4 @@
-module Data.HRTree.Test where
+module Main where
 
 import Data.HRTree.Internal
 import Data.HRTree.Geometry
@@ -43,3 +43,4 @@ testAll = do
     putStrLn "No node should overflow."
     quickCheck prop_NoOverflow
 
+main = Main.testAll
