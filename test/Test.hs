@@ -5,6 +5,7 @@ import Data.HRTree.Geometry
 
 import Data.HRTree.GeometryTest
 import Data.HRTree.HilbertTest
+import Data.HRTree.UtilitiesTest
 
 import Test.QuickCheck
 
@@ -36,6 +37,7 @@ prop_NoOverflow (Leaf records) = length records <= leafCapacity
 testAll = do
     Data.HRTree.GeometryTest.testAll
     Data.HRTree.HilbertTest.testAll
+    Data.HRTree.UtilitiesTest.testAll
     putStrLn "Inserted values are found in a search."
     quickCheck prop_InsertedValuesAreFound
     putStrLn "After an insert, we should always find one more value on a search than before."

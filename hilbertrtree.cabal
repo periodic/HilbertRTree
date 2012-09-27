@@ -19,6 +19,7 @@ library
                 Data.HRTree.Hilbert
                 Data.HRTree.Internal
                 Data.HRTree.Geometry
+                Data.HRTree.Utilities
 
         build-depends: base
         ghc-options: -Wall

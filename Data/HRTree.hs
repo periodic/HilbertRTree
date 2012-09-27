@@ -1,6 +1,7 @@
 module Data.HRTree ( empty
                    , insert
                    , search
+                   , searchNearest
                    , RTree
                    , BoundingBox (..)
                    , Point (..)
@@ -9,3 +10,4 @@ module Data.HRTree ( empty
 
 import Data.HRTree.Geometry
 import Data.HRTree.Internal
+import Data.HRTree.Utilities
