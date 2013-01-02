@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Data.HRTree.Geometry ( Point(..)
                             , BoundingBox (..)
                             , SpatiallyBounded (..)
@@ -6,6 +7,9 @@ module Data.HRTree.Geometry ( Point(..)
 
 import Data.Monoid
 import Data.Word
+
+import Data.Binary
+import Data.DeriveTH
 
 -- | A point just references a point in two-dimensional space, coordinates are given as ints.
 data Point = Point Word16 Word16 deriving (Eq, Ord)
@@ -19,6 +23,9 @@ data BoundingBox = BoundingBox { bbMin :: Point
                                }
                  | EmptyBox
                  deriving (Eq, Ord)
+
+$(derives [makeBinary] [''Point, ''BoundingBox])
+
 
 instance Show BoundingBox where
     show EmptyBox = "<Empty Box>"

@@ -1,5 +1,5 @@
 Name:               HilbertRTree
-Version:            0.1.1
+Version:            0.1.2
 Synopsis:           Simple Hilbert RTree
 Description:        Stores spatial data in an RTree indexed by hilbert distance
 Author:             Drew Haven
@@ -21,7 +21,7 @@ library
                 Data.HRTree.Geometry
                 Data.HRTree.Utilities
 
-        build-depends: base
+        build-depends: base, binary >= 0.5, derive >= 2.5
         ghc-options: -Wall
 
 Test-suite tests
