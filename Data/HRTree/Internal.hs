@@ -6,6 +6,7 @@ import Data.HRTree.Hilbert
 import Data.Word
 import qualified Data.List as L (insert, unfoldr)
 
+import Data.Maybe(catMaybes)
 import Data.Binary
 import Data.DeriveTH
 
@@ -90,6 +91,15 @@ search target = let mbr = boundingBox target
                             else []
         search_mbr mbr (Node records) = concatMap (checkNodeRecord mbr) records
         search_mbr mbr (Leaf records) = concatMap (checkLeafRecord mbr) records
+
+clear :: (SpatiallyBounded a, SpatiallyBounded b) => a -> RTree b -> RTree b
+clear target = clear_mbr
+  where target_mbr = boundingBox target
+        wrap_filled c mlst = c (catMaybes mlst)
+        clear_mbr (Node records) = wrap_filled Node (map proc_node_record records)
+        clear_mbr (Leaf records) = wrap_filled Leaf (map proc_leaf_record records)
+        proc_node_record nr = if bbCovers target_mbr (nrMbr nr) then Nothing else Just . makeNodeRecord . clear_mbr $ nrChild nr
+        proc_leaf_record lr = if bbIntersect (lrMbr lr) target_mbr then Nothing else Just lr
 
 {------------------------------------------------------------
  - Non-exported functions

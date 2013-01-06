@@ -1,5 +1,6 @@
 module Data.HRTree ( empty
                    , insert
+                   , clear
                    , search
                    , searchNearest
                    , RTree

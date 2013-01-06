@@ -2,7 +2,7 @@
 module Data.HRTree.Geometry ( Point(..)
                             , BoundingBox (..)
                             , SpatiallyBounded (..)
-                            , bbIntersect
+                            , bbIntersect, bbCovers
                             ) where
 
 import Data.Monoid
@@ -16,6 +16,10 @@ data Point = Point Word16 Word16 deriving (Eq, Ord)
 
 instance Show Point where
     show (Point x y) = "(" ++ show x ++ "," ++ show y ++ ")"
+
+instance Bounded Point where
+  minBound = Point minBound minBound
+  maxBound = Point maxBound maxBound
 
 -- | A bounding box is a rectangle, and so only needs to specify the bottom-left point and top-right, given by the min/max
 data BoundingBox = BoundingBox { bbMin :: Point
@@ -75,6 +79,8 @@ bbIntersect a b | (boundingBox a == EmptyBox) || (boundingBox b == EmptyBox) = F
                                             then b1 <= a2
                                             else a1 <= b2
                   in intersect xa1 xa2 xb1 xb2 && intersect ya1 ya2 yb1 yb2
+
+bbCovers a b = a `mappend` b == a
 
 fi :: (Integral a, Num b) => a -> b
 fi a = fromIntegral a

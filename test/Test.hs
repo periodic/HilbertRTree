@@ -7,6 +7,8 @@ import Data.HRTree.GeometryTest
 import Data.HRTree.HilbertTest
 import Data.HRTree.UtilitiesTest
 
+import qualified Data.List as L
+
 import Test.QuickCheck
 
 import Control.Applicative ((<$>))
@@ -33,6 +35,13 @@ prop_NoOverflow (Node records) = let thisNode = length records <= nodeCapacity
                                   in and (thisNode : childNodes)
 prop_NoOverflow (Leaf records) = length records <= leafCapacity
 
+prop_ClearWorks :: RTree GeometricFeature -> BoundingBox -> Bool
+prop_ClearWorks t1 b = let u = BoundingBox minBound maxBound
+                           ps1 = search u t1
+                           t2 = clear b t1
+                           outer = search u t2
+                           inner = filter (bbIntersect b) ps1
+                       in  L.sort ps1 == L.sort (outer ++ inner)
 
 testAll = do
     Data.HRTree.GeometryTest.testAll
@@ -40,6 +49,8 @@ testAll = do
     Data.HRTree.UtilitiesTest.testAll
     putStrLn "Inserted values are found in a search."
     quickCheck prop_InsertedValuesAreFound
+    putStrLn "Clear works as expected"
+    quickCheck prop_ClearWorks
     putStrLn "After an insert, we should always find one more value on a search than before."
     quickCheck prop_FindOneMore
     putStrLn "No node should overflow."
