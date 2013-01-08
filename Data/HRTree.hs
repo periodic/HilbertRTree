@@ -3,6 +3,7 @@ module Data.HRTree ( empty
                    , clear
                    , search
                    , searchNearest
+                   , mapRTree
                    , RTree
                    , BoundingBox (..)
                    , Point (..)

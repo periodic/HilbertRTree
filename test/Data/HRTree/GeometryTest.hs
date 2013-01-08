@@ -30,6 +30,9 @@ instance Arbitrary GeometricFeature where
                       , fmap FeatLine (liftM2 (:) arbitrary arbitrary)
                       ]
 
+instance CoArbitrary GeometricFeature where
+  coarbitrary (FeatPoint (Point x y)) = variant (abs $ x + y)
+  coarbitrary (FeatLine ps) = variant (negate . length $ ps)
 
 -- |Bounding boxes should be associative.
 prop_Associative :: GeometricFeature -> GeometricFeature -> GeometricFeature -> Bool

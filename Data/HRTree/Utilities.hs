@@ -6,8 +6,14 @@ import Data.HRTree.Internal
 import Data.Int(Int64)
 import Data.Word(Word16)
 import Data.Ord(comparing)
-import Data.List(sortBy)
+import Data.List(sortBy,foldl')
 import Data.Maybe(fromJust)
+
+-- rebuilds the tree mapping a given function to it's elements
+-- can't be a Functor because of class constraints
+mapRTree :: (SpatiallyBounded a, SpatiallyBounded b) => (a -> b) -> RTree a -> RTree b
+mapRTree f tree = let elems = search (BoundingBox (Point minBound minBound) (Point maxBound maxBound)) tree
+                  in foldl' (flip insert) empty $ map f elems
 
 -- Returns elements of the tree in order of increasing distance from the given point
 searchNearest :: SpatiallyBounded a => Point -> RTree a -> [a]
@@ -45,5 +51,6 @@ squares (Point x0 y0) = zip growing_boxes (map (^2) powers)
 
 until_eq (x1:xs@(x2:_)) | x1 == x2 = [x1]
                         | True = x1: until_eq xs
+until_eq _ = error "until_eq should be applied to infinite streams"
 
 fi a = fromIntegral a

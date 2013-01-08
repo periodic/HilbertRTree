@@ -52,7 +52,7 @@ instance (SpatiallyBounded a, Show a) => Show (LeafRecord a) where
  -}
 data RTree a = Node [NodeRecord a]
              | Leaf [LeafRecord a]
--- | INstances for RTree
+-- | Instances for RTree
 instance (SpatiallyBounded a) => SpatiallyBounded (RTree a) where
     boundingBox (Node records) = boundingBox . map nrMbr $ records
     boundingBox (Leaf records) = boundingBox . map lrMbr $ records

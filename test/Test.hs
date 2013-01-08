@@ -51,6 +51,8 @@ testAll = do
     quickCheck prop_InsertedValuesAreFound
     putStrLn "Clear works as expected"
     quickCheck prop_ClearWorks
+    putStrLn "Functor axioms for mapRTree"
+    quickCheck prop_functor_axiom
     putStrLn "After an insert, we should always find one more value on a search than before."
     quickCheck prop_FindOneMore
     putStrLn "No node should overflow."
