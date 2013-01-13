@@ -1,6 +1,6 @@
 module Data.HRTree ( empty
                    , insert
-                   , clear
+                   , modifyRegion
                    , search
                    , searchNearest
                    , mapRTree
@@ -8,6 +8,7 @@ module Data.HRTree ( empty
                    , BoundingBox (..)
                    , Point (..)
                    , SpatiallyBounded(..)
+                   , Metric(..)
                    ) where
 
 import Data.HRTree.Geometry

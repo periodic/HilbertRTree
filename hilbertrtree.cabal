@@ -1,5 +1,5 @@
 Name:               HilbertRTree
-Version:            0.2.2
+Version:            0.3.0
 Synopsis:           Simple Hilbert RTree
 Description:        Stores spatial data in an RTree indexed by hilbert distance
 Author:             Drew Haven
