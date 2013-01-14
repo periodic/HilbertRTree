@@ -8,7 +8,6 @@ module Data.HRTree ( empty
                    , BoundingBox (..)
                    , Point (..)
                    , SpatiallyBounded(..)
-                   , Metric(..)
                    ) where
 
 import Data.HRTree.Geometry

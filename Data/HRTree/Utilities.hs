@@ -16,16 +16,15 @@ mapRTree f tree = let elems = search (BoundingBox (Point minBound minBound) (Poi
                   in foldl' (flip insert) empty $ map f elems
 
 -- Returns elements of the tree in order of increasing distance from the center of given object
-searchNearest :: (SpatiallyBounded a, Metric a) => a -> RTree a -> [a]
-searchNearest p0 t = sort_nearest p0 0 $ map (\(bb,sqr) -> (search bb t, sqr)) (squares . fromJust . center $ p0)
+searchNearest :: (SpatiallyBounded a, SpatiallyBounded b) => (b -> a -> Float) -> b -> RTree a -> [a]
+searchNearest metric p0 t = sort_nearest (metric p0) 0 $ map (\(bb,sqr) -> (search bb t, sqr)) (squares . fromJust . center $ p0)
 
-sort_nearest :: (SpatiallyBounded a, Metric a) => a -> Int64 -> [([a],Int64)] -> [a]
+sort_nearest :: (SpatiallyBounded a) => (a -> Float) -> Int64 -> [([a],Int64)] -> [a]
 sort_nearest _ _ [] = []
-sort_nearest p0 prev_size ((cur,cur_size):rest) = sorted ++ sort_nearest p0 cur_size rest
+sort_nearest metric1 prev_size ((cur,cur_size):rest) = sorted ++ sort_nearest metric1 cur_size rest
   where
-    new = filter (\p -> let d = dist p in fi prev_size <= d && d < fi cur_size) cur
-    sorted = sortBy (comparing dist) new
-    dist = metric p0
+    new = filter (\p -> let d = metric1 p in fi prev_size <= d && d < fi cur_size) cur
+    sorted = sortBy (comparing metric1) new
 
 -- a sequence of Growing squares and their sizes
 squares :: Point -> [(BoundingBox,Int64)]

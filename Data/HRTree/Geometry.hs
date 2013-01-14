@@ -2,7 +2,6 @@
 module Data.HRTree.Geometry ( Point(..)
                             , BoundingBox (..)
                             , SpatiallyBounded (..)
-                            , Metric(..)
                             , bbIntersect, bbCovers
                             ) where
 
@@ -69,9 +68,6 @@ instance (SpatiallyBounded a, SpatiallyBounded b) => SpatiallyBounded (a, b) whe
 
 instance SpatiallyBounded a => SpatiallyBounded [a] where
     boundingBox = foldr (mappend . boundingBox) EmptyBox
-
-class Metric v where
-  metric :: v -> v -> Float
 
 -- | Intersection of two boxes
 bbIntersect :: (SpatiallyBounded a, SpatiallyBounded b) => a -> b -> Bool

@@ -23,8 +23,7 @@ instance Arbitrary Point3D where
 instance SpatiallyBounded Point3D where
   boundingBox (Point3D x y z) = boundingBox $ Point (round x) (round y)
 
-instance Metric Point3D where
-  (Point3D x1 y1 z1) `metric` (Point3D x2 y2 z2) = sqrt $ (x1 - x2) ^2 + (y1 - y2) ^2 + (z1 - z2) ^ 2
+(Point3D x1 y1 z1) `metric` (Point3D x2 y2 z2) = sqrt $ (x1 - x2) ^2 + (y1 - y2) ^2 + (z1 - z2) ^ 2
 
 growing (x1:x2:xs) = x1 <= x2 && growing (x2:xs)
 growing _ = True
@@ -32,7 +31,7 @@ growing _ = True
 test_search :: Point3D -> [Point3D] -> Bool
 test_search center points =
   let tree = foldr insert empty points
-      sorted_points = searchNearest center tree
+      sorted_points = searchNearest metric center tree
       dists = map (metric center) sorted_points
       dists2 = map (metric center) $ sortBy (comparing (metric center)) points
   in growing dists && dists == dists2
