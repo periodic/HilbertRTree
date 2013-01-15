@@ -10,7 +10,9 @@ instance Arbitrary Point where
     arbitrary = liftM2 Point arbitrary arbitrary
 
 instance Arbitrary BoundingBox where
-    arbitrary = oneof [ liftM2 BoundingBox arbitrary arbitrary
+    arbitrary = oneof [ do minB@(Point x1 y1) <- arbitrary
+                           maxB <- arbitrary `suchThat` (\(Point x2 y2) -> x1 <= x2 && y1 <= y2)
+                           return $ BoundingBox minB maxB
                       , return EmptyBox
                       ]
 
@@ -28,6 +30,9 @@ instance Arbitrary GeometricFeature where
                       , fmap FeatLine (liftM2 (:) arbitrary arbitrary)
                       ]
 
+instance CoArbitrary GeometricFeature where
+  coarbitrary (FeatPoint (Point x y)) = variant (abs $ x + y)
+  coarbitrary (FeatLine ps) = variant (negate . length $ ps)
 
 -- |Bounding boxes should be associative.
 prop_Associative :: GeometricFeature -> GeometricFeature -> GeometricFeature -> Bool

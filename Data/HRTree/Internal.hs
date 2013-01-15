@@ -1,9 +1,13 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Data.HRTree.Internal where
 
 import Data.HRTree.Geometry
 import Data.HRTree.Hilbert
 import Data.Word
 import qualified Data.List as L (insert, unfoldr)
+
+import Data.Binary
+import Data.DeriveTH
 
 -- | Capacity constants.  TODO: Make these tunable.
 nodeCapacity = 4
@@ -14,7 +18,7 @@ splitOrder = 1
 type Key = Word32
 
 -- | Individual records of an internal node.
-data (SpatiallyBounded a) => NodeRecord a =
+data NodeRecord a =
     NR { nrMbr   :: BoundingBox
        , nrKey   :: Key
        , nrChild :: RTree a
@@ -29,7 +33,7 @@ instance (SpatiallyBounded a, Show a) => Show (NodeRecord a) where
     show (NR _ _ child) = show child
 
 -- | Individual records of a leaf node.
-data (SpatiallyBounded a) => LeafRecord a =
+data LeafRecord a =
     LR { lrMbr   :: BoundingBox
        , lrKey   :: Key
        , lrObj   :: a
@@ -45,15 +49,17 @@ instance (SpatiallyBounded a, Show a) => Show (LeafRecord a) where
 
 {- | The RTree type, which is really just a node, either an internal node or a leaf.
  -}
-data (SpatiallyBounded a) => RTree a = Node [NodeRecord a]
-                                     | Leaf [LeafRecord a]
--- | INstances for RTree
+data RTree a = Node [NodeRecord a]
+             | Leaf [LeafRecord a]
+-- | Instances for RTree
 instance (SpatiallyBounded a) => SpatiallyBounded (RTree a) where
     boundingBox (Node records) = boundingBox . map nrMbr $ records
     boundingBox (Leaf records) = boundingBox . map lrMbr $ records
 instance (SpatiallyBounded a, Show a) => Show (RTree a) where
     show (Node records) = "<" ++ show records ++ ">"
     show (Leaf records) = "<" ++ show records ++ ">"
+
+$(derives [makeBinary] [''NodeRecord, ''LeafRecord, ''RTree])
 
 {- | Create an empty RTree.  An empty tree is just a single leaf.
  -}

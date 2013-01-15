@@ -7,7 +7,7 @@ import Prelude hiding (takeWhile)
 import Data.HRTree.Geometry
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as C8
-import Data.Attoparsec as P
+import Data.Attoparsec
 import Control.Applicative ((<$>),(<*>), (<*), (*>))
 import Data.Char (ord)
 import System.IO (stdin)
@@ -38,7 +38,7 @@ parseRect = Rect <$> point
 
 readRectsFromFile :: FilePath -> IO (Either String [Rectangle])
 readRectsFromFile path =
-    parseOnly (many (parseRect <* eol)) <$> BS.readFile path
+    parseOnly (many1 (parseRect <* eol)) <$> BS.readFile path
     where
         eol         = satisfy isEol
         isEol       = (== 10)
